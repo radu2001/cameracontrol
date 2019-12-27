@@ -236,11 +236,11 @@ void do_zoom(int val_joystick, TASTATURA &tst) {
     digitalWrite(tst.zoom_selectat.zoom_out_fast, HIGH);
   }
 
-  else if (val_joystick < 487 && val_joystick > 50) {
+  else if (val_joystick < 487 && val_joystick > 20) {
     digitalWrite(tst.zoom_selectat.zoom_in_slow, HIGH);
   }
 
-  else if (val_joystick < 50) {
+  else if (val_joystick < 20) {
     digitalWrite(tst.zoom_selectat.zoom_in_fast, HIGH);
   }
   return;
