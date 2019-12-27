@@ -5,7 +5,6 @@
 #define JoystickZoom1 4
 #define JoystickZoom2 5
 #define keyboard_debounce 75  //cat de des citim tastatura; o data la 75ms
-#define zoom_pwm_value 572  //telecomanda functioneaza la 2.78V
 
 typedef struct {
   byte speed_pin;
@@ -28,7 +27,8 @@ MOTOR M1 = {10, 46, 47, 49, 48}; // M1 = balcon
 MOTOR M2 = {12, 42, 43, 44, 45}; // M2 = mijloc
 MOTOR M4 = {101, 99, 99, 99, 99};
 
-ZOOM Z1 = {13, 9, 7, 8};  // Z1 = mijloc sala mare
+//z_in_slow_fast__z_out_slow_fast
+ZOOM Z1 = {41, 38, 39, 40};  // Z1 = mijloc sala mare
 ZOOM Z2 = {99, 99, 99, 99};
 ZOOM Z3 = {99, 99, 99, 99};
 
@@ -46,8 +46,8 @@ typedef struct {
 } TASTATURA;
 
         //tasta 1, 2,  3,  4 
-TASTATURA T = {28, 26, 22, 24, M1, 99, 99, 99, 99, Z2};  //valorile default cu care pornim - motor amvon + balcon
-TASTATURA T2= {27, 23, 29, 25, M2, 99, 99, 99, 99, Z1};
+TASTATURA T = {28, 26, 22, 24, M1, 99, 99, 99, 99, Z1};  //valorile default cu care pornim - motor amvon + balcon
+TASTATURA T2= {27, 23, 29, 25, M2, 99, 99, 99, 99, Z2};
 
 void setup() {
   //pinMode(M1.speed_pin, OUTPUT); //teoretic nu avem nevoie, ar trebui sa fie pin PWM
@@ -192,7 +192,7 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t1) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M1;
-      Serial.println("apasat: 1");
+      //Serial.println("apasat: 1");
       //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
       return;
     }
@@ -200,7 +200,7 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t2) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M2;
-      Serial.println("apasat: 2");
+      //Serial.println("apasat: 2");
       //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
       return;
     }
@@ -208,7 +208,7 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t3) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M3;
-      Serial.println("apasat: 3");
+      //Serial.println("apasat: 3");
       //digitalWrite(tst.led3, HIGH);
       return;
     }
@@ -216,52 +216,32 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t4) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M4;
-      Serial.println("apasat: 4");
+      //Serial.println("apasat: 4");
       //digitalWrite(tst.led4, HIGH);
       return;
     }
 }
 
 void do_zoom(int val_joystick, TASTATURA &tst) {
-  analogWrite(tst.zoom_selectat.zoom_in_slow, 0);
-  analogWrite(tst.zoom_selectat.zoom_in_fast, 0);
-  analogWrite(tst.zoom_selectat.zoom_out_fast, 0);
-  analogWrite(tst.zoom_selectat.zoom_out_slow, 0);
+  digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
+  digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
+  digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+  digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
   
-  if (val_joystick > 535 && val_joystick < 780) {
-    //Serial.println("zoom_out_slow==============");
-    analogWrite(tst.zoom_selectat.zoom_out_slow, zoom_pwm_value);
-    
-    //analogWrite(tst.zoom_selectat.zoom_in_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_in_slow, 0);
+  if (val_joystick > 535 && val_joystick < 1018) {
+    digitalWrite(tst.zoom_selectat.zoom_out_slow, HIGH);
   }
 
-  else if (val_joystick > 780) {
-    //Serial.println("zoom_out_fast+++++++++++++++++");
-    analogWrite(tst.zoom_selectat.zoom_out_fast, zoom_pwm_value);
-    
-    //analogWrite(tst.zoom_selectat.zoom_in_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_in_slow, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_slow, 0);
+  else if (val_joystick > 1018) {
+    digitalWrite(tst.zoom_selectat.zoom_out_fast, HIGH);
   }
 
-  else if (val_joystick < 487 && val_joystick > 266) {
-    //Serial.println("zoom_in_slow%%%%%%%%%%%%%%%%%%%%%%");
-    analogWrite(tst.zoom_selectat.zoom_in_slow, zoom_pwm_value);
-    
-    //analogWrite(tst.zoom_selectat.zoom_in_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_slow, 0);
+  else if (val_joystick < 487 && val_joystick > 50) {
+    digitalWrite(tst.zoom_selectat.zoom_in_slow, HIGH);
   }
 
-  else if (val_joystick < 266) {
-    //Serial.println("zoom_in_fast************************");
-    analogWrite(tst.zoom_selectat.zoom_in_fast, zoom_pwm_value);
-    
-    //analogWrite(tst.zoom_selectat.zoom_in_slow, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_fast, 0);
-    //analogWrite(tst.zoom_selectat.zoom_out_slow, 0);
+  else if (val_joystick < 50) {
+    digitalWrite(tst.zoom_selectat.zoom_in_fast, HIGH);
   }
   return;
 }
