@@ -23,9 +23,9 @@ typedef struct {
 } ZOOM;
 
             //  st, dr, sus, jos
-MOTOR M3 = {11, 50, 51, 52, 53}; // M3 = cor
+MOTOR M3 = {11, 52, 53, 51, 50}; // M3 = cor
 MOTOR M1 = {10, 46, 47, 49, 48}; // M1 = balcon
-MOTOR M2 = {12, 42, 43, 44, 45}; // M2 = amvon
+MOTOR M2 = {12, 42, 43, 44, 45}; // M2 = mijloc
 MOTOR M4 = {101, 99, 99, 99, 99};
 
 ZOOM Z1 = {13, 9, 7, 8};  // Z1 = mijloc sala mare
