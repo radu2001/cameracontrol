@@ -29,7 +29,7 @@ MOTOR M4 = {101, 99, 99, 99, 99};
 
 //z_in_slow_fast__z_out_slow_fast
 ZOOM Z1 = {41, 38, 39, 40};  // Z1 = mijloc sala mare
-ZOOM Z2 = {36, 37, 34, 35};
+ZOOM Z2 = {36, 37, 35, 34};
 ZOOM Z3 = {99, 99, 99, 99};
 
 typedef struct {
@@ -55,6 +55,10 @@ void setup() {
   pinMode(Z1.zoom_in_slow, OUTPUT);
   pinMode(Z1.zoom_out_fast, OUTPUT);
   pinMode(Z1.zoom_out_slow, OUTPUT);
+  pinMode(Z2.zoom_in_fast, OUTPUT);
+  pinMode(Z2.zoom_in_slow, OUTPUT);
+  pinMode(Z2.zoom_out_fast, OUTPUT);
+  pinMode(Z2.zoom_out_slow, OUTPUT);
   pinMode(M1.direction_up, OUTPUT);
   pinMode(M1.direction_down, OUTPUT);
   pinMode(M1.direction_left, OUTPUT);
@@ -224,7 +228,7 @@ void read_key(TASTATURA &tst) {
 
 void do_zoom(int val_joystick, TASTATURA &tst) {
 
-  if (val_joystick > 487 && val_joystick <535) {
+  if (val_joystick > 487 && val_joystick < 535) {
     digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
