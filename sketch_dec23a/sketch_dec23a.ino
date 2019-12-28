@@ -29,7 +29,7 @@ MOTOR M4 = {101, 99, 99, 99, 99};
 
 //z_in_slow_fast__z_out_slow_fast
 ZOOM Z1 = {41, 38, 39, 40};  // Z1 = mijloc sala mare
-ZOOM Z2 = {99, 99, 99, 99};
+ZOOM Z2 = {36, 37, 34, 35};
 ZOOM Z3 = {99, 99, 99, 99};
 
 typedef struct {
@@ -223,25 +223,44 @@ void read_key(TASTATURA &tst) {
 }
 
 void do_zoom(int val_joystick, TASTATURA &tst) {
-  digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
-  digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
-  digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
-  digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+
+  if (val_joystick > 487 && val_joystick <535) {
+    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+  }
   
-  if (val_joystick > 535 && val_joystick < 1018) {
+  if (val_joystick > 535 && val_joystick < 1015) {
     digitalWrite(tst.zoom_selectat.zoom_out_slow, HIGH);
+    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    return;
   }
 
-  else if (val_joystick > 1018) {
+  if (val_joystick > 1015) {
     digitalWrite(tst.zoom_selectat.zoom_out_fast, HIGH);
+    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    return;
   }
 
-  else if (val_joystick < 487 && val_joystick > 20) {
+  if (val_joystick < 487 && val_joystick > 5) {
     digitalWrite(tst.zoom_selectat.zoom_in_slow, HIGH);
+    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    return;
   }
 
-  else if (val_joystick < 20) {
+  if (val_joystick < 5) {
     digitalWrite(tst.zoom_selectat.zoom_in_fast, HIGH);
+    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    return;
   }
   return;
 }
