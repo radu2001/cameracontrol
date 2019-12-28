@@ -228,14 +228,14 @@ void read_key(TASTATURA &tst) {
 
 void do_zoom(int val_joystick, TASTATURA &tst) {
 
-  if (val_joystick > 487 && val_joystick < 535) {
+  if (val_joystick > 387 && val_joystick < 635) {
     digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
     digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
   }
   
-  if (val_joystick > 535 && val_joystick < 1015) {
+  if (val_joystick > 635 && val_joystick < 1015) {
     digitalWrite(tst.zoom_selectat.zoom_out_slow, HIGH);
     digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
@@ -251,7 +251,7 @@ void do_zoom(int val_joystick, TASTATURA &tst) {
     return;
   }
 
-  if (val_joystick < 487 && val_joystick > 5) {
+  if (val_joystick < 387 && val_joystick > 5) {
     digitalWrite(tst.zoom_selectat.zoom_in_slow, HIGH);
     digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
     digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
