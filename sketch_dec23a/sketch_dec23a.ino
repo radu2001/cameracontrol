@@ -1,18 +1,10 @@
-#define Joystick1ControlX 0
-#define Joystick1ControlY 1
-#define Joystick2ControlX 2
+#define Joystick1ControlX 1 //joystick stanga
+#define Joystick1ControlY 0
+#define Joystick2ControlX 2 //joystick dreapta
 #define Joystick2ControlY 3
 #define JoystickZoom1 4
 #define JoystickZoom2 5
 #define keyboard_debounce 75  //cat de des citim tastatura; o data la 75ms
-
-typedef struct {
-  byte speed_pin;
-  byte direction_up;
-  byte direction_down;
-  byte direction_left;
-  byte direction_right;
-} MOTOR;
 
 typedef struct {
   byte zoom_in_fast;
@@ -21,16 +13,25 @@ typedef struct {
   byte zoom_out_slow;
 } ZOOM;
 
-      //viteza, st, dr, sus, jos
-MOTOR M3 = {11, 52, 53, 51, 50}; // M3 = cor
-MOTOR M1 = {10, 46, 47, 49, 48}; // M1 = balcon
-MOTOR M2 = {12, 42, 43, 44, 45}; // M2 = mijloc
-MOTOR M4 = {101, 99, 99, 99, 99};
-
 //z_in_slow_fast__z_out_slow_fast
-ZOOM Z1 = {41, 38, 39, 40};  // Z1 = mijloc sala mare
-ZOOM Z2 = {36, 37, 35, 34};
+ZOOM Z1 = {41, 38, 39, 40};  // Z1 = balcon
+ZOOM Z2 = {36, 37, 35, 34};  // Z2 = mijloc sala mare
 ZOOM Z3 = {99, 99, 99, 99};
+
+typedef struct {
+  byte speed_pin;
+  byte direction_up;
+  byte direction_down;
+  byte direction_left;
+  byte direction_right;
+  ZOOM zoom_selectat;
+} MOTOR;
+
+      //viteza, st, dr, sus, jos
+MOTOR M3 = {11, 52, 53, 51, 50, Z3}; // M3 = cor
+MOTOR M1 = {10, 46, 47, 48, 49, Z1}; // M1 = balcon
+MOTOR M2 = {12, 42, 43, 44, 45, Z2}; // M2 = mijloc
+MOTOR M4 = {101, 99, 99, 99, 99};
 
 typedef struct {
   byte t1;  //tasta1
@@ -42,12 +43,11 @@ typedef struct {
   byte led2;
   byte led3;
   byte led4;
-  ZOOM zoom_selectat;
 } TASTATURA;
 
         //tasta 1, 2,  3,  4,motor,led,led,led,led,zoom
-TASTATURA T = {28, 26, 22, 24, M1, 99, 99, 99, 99, Z1};  //valorile default cu care pornim - motor amvon + balcon
-TASTATURA T2= {27, 23, 29, 25, M2, 99, 99, 99, 99, Z2};
+TASTATURA T = {28, 26, 22, 24, M1, 99, 99, 99, 99};  //valorile default cu care pornim - motor amvon + balcon
+TASTATURA T2= {27, 23, 29, 25, M2, 99, 99, 99, 99};
 
 void setup() {
   //pinMode(M1.speed_pin, OUTPUT); //teoretic nu avem nevoie, ar trebui sa fie pin PWM
@@ -114,46 +114,79 @@ void loop() {
     }
     startTime = millis();
   } */
+
   read_key(T);
   read_key(T2);
+  
   X = analogRead(Joystick1ControlX);
   Y = analogRead(Joystick1ControlY);
   Z = analogRead(JoystickZoom1);
-  do_zoom(Z, T);
+  //Serial.println(X);
+  //Serial.println(Y);
   //Serial.println(Z);
-  muta_motor(X, Y, T.selectat);
+  muta_motor_joystick1(X, Y, T.selectat, Z);
   X = analogRead(Joystick2ControlX);
   Y = analogRead(Joystick2ControlY);
   Z = analogRead(JoystickZoom2);
-  do_zoom(Z, T2);
   //Serial.println(Z);
-  muta_motor(X, Y, T2.selectat);
+  muta_motor_joystick2(X, Y, T2.selectat, Z);
   //Serial.println(X);
   //Serial.println(Y);
 
 }  
 
-void muta_motor(int X1, int Y1, MOTOR M) {
-  if (X1 > 535) {  //stanga - axa X  //citim intre 487 < X < 535 sa eliminam eroarea joystick-ului in punctul 511 (1023/2)
-    motor(M.speed_pin, M.direction_left, M.direction_right, 1, X1, true);
-    //analogWrite(pwm_port, map(spd, 536, 1023, 0, 255));
-    //digitalWrite(direction_port1, HIGH);
-     // digitalWrite(direction_port2, LOW);
+void muta_motor_joystick1(int X1, int Y1, MOTOR M, int Z) {
+
+  do_zoom_joystick1(Z, M.zoom_selectat);
+  
+  if (X1 > 535) {  //dreapta - axa X  //citim intre 487 < X < 535 sa eliminam eroarea joystick-ului in punctul 511 (1023/2)
+    motor(M.speed_pin, M.direction_up, M.direction_down, 2, X1, true);
   }
 
-  else if (X1 < 487) { //dreapta
+  else if (X1 < 487) { //stanga
+    motor(M.speed_pin, M.direction_up, M.direction_down, 1, X1, false);
+  }
+
+  else { //cand revine joystick-ul la 0 pe axa stanga/dreapta
+    motor(M.speed_pin, M.direction_up, M.direction_down, 3, X1, false);
+  }
+
+  if (Y1 < 487) {  //sus - axa Y
+    motor(M.speed_pin, M.direction_right, M.direction_left, 2, Y1, false);
+  }
+
+  else if (Y1 > 535) { //jos
+    motor(M.speed_pin, M.direction_right, M.direction_left, 1, Y1, true);
+  }
+
+  else { //cand revine joystick-ul la 0 pe axa sus/jos
+    motor(M.speed_pin, M.direction_right, M.direction_left, 3, Y1, false);
+  }  
+  return;
+}
+
+void muta_motor_joystick2(int X1, int Y1, MOTOR M, int Z) {
+
+  do_zoom_joystick2(Z, M.zoom_selectat);
+  
+  if (X1 > 535) {  //sus  //citim intre 487 < X < 535 sa eliminam eroarea joystick-ului in punctul 511 (1023/2)
+    motor(M.speed_pin, M.direction_left, M.direction_right, 1, X1, true);
+  }
+
+  else if (X1 < 475) { //jos
     motor(M.speed_pin, M.direction_left, M.direction_right, 2, X1, false);
+
   }
 
   else { //cand revine joystick-ul la 0 pe axa stanga/dreapta
     motor(M.speed_pin, M.direction_left, M.direction_right, 3, X1, false);
   }
 
-  if (Y1 < 487) {  //sus - axa Y
+  if (Y1 < 487) {  //stanga
     motor(M.speed_pin, M.direction_up, M.direction_down, 1, Y1, false);
   }
 
-  else if (Y1 > 535) { //jos
+  else if (Y1 > 535) { //dreapta
     motor(M.speed_pin, M.direction_up, M.direction_down, 2, Y1, true);
   }
 
@@ -218,10 +251,6 @@ void read_key(TASTATURA &tst) {
       _stop_motor_complet(tst);
       tst.selectat = M1;
       //Serial.println("apasat: 1");
-      //Serial.println(tst.selectat.direction_up);
-      //Serial.println(tst.selectat.direction_down);
-      //Serial.println(tst.selectat.direction_left);
-      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
       return;
     }
@@ -230,10 +259,6 @@ void read_key(TASTATURA &tst) {
       _stop_motor_complet(tst);
       tst.selectat = M2;
       //Serial.println("apasat: 2");
-      //Serial.println(tst.selectat.direction_up);
-      //Serial.println(tst.selectat.direction_down);
-      //Serial.println(tst.selectat.direction_left);
-      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
       return;
     }
@@ -242,10 +267,6 @@ void read_key(TASTATURA &tst) {
       _stop_motor_complet(tst);
       tst.selectat = M3;
       //Serial.println("apasat: 3");
-      //Serial.println(tst.selectat.direction_up);
-      //Serial.println(tst.selectat.direction_down);
-      //Serial.println(tst.selectat.direction_left);
-      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led3, HIGH);
       return;
     }
@@ -254,54 +275,92 @@ void read_key(TASTATURA &tst) {
       _stop_motor_complet(tst);
       tst.selectat = M4;
       //Serial.println("apasat: 4");
-      //Serial.println(tst.selectat.direction_up);
-      //Serial.println(tst.selectat.direction_down);
-      //Serial.println(tst.selectat.direction_left);
-      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led4, HIGH);
       return;
     }
 }
 
-void do_zoom(int val_joystick, TASTATURA &tst) {
-
+void do_zoom_joystick1(int val_joystick, ZOOM zoom_selectat) {
   if (val_joystick > 387 && val_joystick < 635) {
-    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
     return;
   }
   
   if (val_joystick > 635 && val_joystick < 1015) {
-    digitalWrite(tst.zoom_selectat.zoom_out_slow, HIGH);
-    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
     return;
   }
 
   if (val_joystick > 1015) {
-    digitalWrite(tst.zoom_selectat.zoom_out_fast, HIGH);
-    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
     return;
   }
 
   if (val_joystick < 387 && val_joystick > 5) {
-    digitalWrite(tst.zoom_selectat.zoom_in_slow, HIGH);
-    digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_slow, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
     return;
   }
 
   if (val_joystick < 5) {
-    digitalWrite(tst.zoom_selectat.zoom_in_fast, HIGH);
-    digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
-    digitalWrite(tst.zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
+    return;
+  }
+  return;
+}
+
+void do_zoom_joystick2(int val_joystick, ZOOM zoom_selectat) {
+  if (val_joystick > 387 && val_joystick < 635) {
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    return;
+  }
+  
+  if (val_joystick > 635 && val_joystick < 1015) {
+    digitalWrite(zoom_selectat.zoom_out_slow, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    return;
+  }
+
+  if (val_joystick > 1015) {
+    digitalWrite(zoom_selectat.zoom_out_fast, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
+    return;
+  }
+
+  if (val_joystick < 387 && val_joystick > 5) {
+    digitalWrite(zoom_selectat.zoom_in_slow, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
+    return;
+  }
+
+  if (val_joystick < 5) {
+    digitalWrite(zoom_selectat.zoom_in_fast, HIGH);
+    digitalWrite(zoom_selectat.zoom_in_slow, LOW);
+    digitalWrite(zoom_selectat.zoom_out_fast, LOW);
+    digitalWrite(zoom_selectat.zoom_out_slow, LOW);
     return;
   }
   return;
