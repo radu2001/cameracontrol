@@ -117,6 +117,9 @@ void loop() {
 
   read_key(T);
   read_key(T2);
+  if (T.selectat == T2.selectat) { //hack ca sa evitam sa facem zoom in acelasi timp de la 2 joystick-uri.
+      T2.selectat.zoom_selectat = {};
+    }  //TODO: switch asincron sa nu controlam acelasi motoar+zoom in acealasi timp de la 2 joystick-uri diferite.
   
   X = analogRead(Joystick1ControlX);
   Y = analogRead(Joystick1ControlY);
@@ -128,11 +131,10 @@ void loop() {
   X = analogRead(Joystick2ControlX);
   Y = analogRead(Joystick2ControlY);
   Z = analogRead(JoystickZoom2);
-  //Serial.println(Z);
   muta_motor_joystick2(X, Y, T2.selectat, Z);
   //Serial.println(X);
   //Serial.println(Y);
-
+  //Serial.println(Z);
 }  
 
 void muta_motor_joystick1(int X1, int Y1, MOTOR M, int Z) {
@@ -281,6 +283,7 @@ void read_key(TASTATURA &tst) {
 }
 
 void do_zoom_joystick1(int val_joystick, ZOOM zoom_selectat) {
+  Serial.println(val_joystick);
   if (val_joystick > 387 && val_joystick < 635) {
     digitalWrite(zoom_selectat.zoom_out_slow, LOW);
     digitalWrite(zoom_selectat.zoom_in_slow, LOW);
@@ -289,7 +292,7 @@ void do_zoom_joystick1(int val_joystick, ZOOM zoom_selectat) {
     return;
   }
   
-  if (val_joystick > 635 && val_joystick < 1015) {
+  if (val_joystick > 635 && val_joystick < 980) {
     digitalWrite(zoom_selectat.zoom_out_slow, HIGH);
     digitalWrite(zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(zoom_selectat.zoom_in_fast, LOW);
@@ -297,7 +300,7 @@ void do_zoom_joystick1(int val_joystick, ZOOM zoom_selectat) {
     return;
   }
 
-  if (val_joystick > 1015) {
+  if (val_joystick > 980) {
     digitalWrite(zoom_selectat.zoom_out_fast, HIGH);
     digitalWrite(zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(zoom_selectat.zoom_in_fast, LOW);
