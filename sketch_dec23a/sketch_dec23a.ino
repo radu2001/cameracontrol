@@ -21,7 +21,7 @@ typedef struct {
   byte zoom_out_slow;
 } ZOOM;
 
-            //  st, dr, sus, jos
+      //viteza, st, dr, sus, jos
 MOTOR M3 = {11, 52, 53, 51, 50}; // M3 = cor
 MOTOR M1 = {10, 46, 47, 49, 48}; // M1 = balcon
 MOTOR M2 = {12, 42, 43, 44, 45}; // M2 = mijloc
@@ -45,7 +45,7 @@ typedef struct {
   ZOOM zoom_selectat;
 } TASTATURA;
 
-        //tasta 1, 2,  3,  4 
+        //tasta 1, 2,  3,  4,motor,led,led,led,led,zoom
 TASTATURA T = {28, 26, 22, 24, M1, 99, 99, 99, 99, Z1};  //valorile default cu care pornim - motor amvon + balcon
 TASTATURA T2= {27, 23, 29, 25, M2, 99, 99, 99, 99, Z2};
 
@@ -163,25 +163,43 @@ void muta_motor(int X1, int Y1, MOTOR M) {
 void motor(byte pwm_port, byte direction_port1, byte direction_port2, byte dir, int spd, bool is_inverted) {
   switch (dir) {
     case 1: //left or up (dat de parametrul byte dir)
+      //calculam viteza cu care mergem
+      if (is_inverted) {
+        analogWrite(pwm_port, map(spd, 536, 1023, 0, 255));
+        //Serial.println(map(spd, 536, 1023, 0, 255));
+      }
+      else {
+        analogWrite(pwm_port, map(spd, 486, 0, 0, 255));
+        //Serial.println(map(spd, 486, 0, 0, 255));
+      }
+      
+      //
       digitalWrite(direction_port1, HIGH);
       digitalWrite(direction_port2, LOW);
       break;
+      
     case 2: //right or down
+      if (is_inverted) {
+        analogWrite(pwm_port, map(spd, 536, 1023, 0, 255));
+        //Serial.println(map(spd, 536, 1023, 0, 255));
+      }
+      else {
+        analogWrite(pwm_port, map(spd, 486, 0, 0, 255));
+        //Serial.println(map(spd, 486, 0, 0, 255));
+      }
+
+      //
       digitalWrite(direction_port1, LOW);
       digitalWrite(direction_port2, HIGH);
       break;
+      
     case 3: //oprim motorul pe directia data
+      analogWrite(pwm_port, 0);
+      
+      //
       digitalWrite(direction_port1, HIGH);
       digitalWrite(direction_port2, HIGH);
-      return;
-  }
-  if (is_inverted) {
-    analogWrite(pwm_port, map(spd, 536, 1023, 0, 255));
-    //Serial.println(map(spd, 536, 1023, 0, 255));
-  }
-  else {
-    analogWrite(pwm_port, map(spd, 486, 0, 0, 255));
-    //Serial.println(map(spd, 486, 0, 0, 255));
+      break;
   }
 }
 
@@ -196,7 +214,12 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t1) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M1;
-      //Serial.println("apasat: 1");
+      Serial.println("apasat: 1");
+      Serial.println(tst.selectat);
+      Serial.println(tst.selectat.direction_up);
+      Serial.println(tst.selectat.direction_down);
+      Serial.println(tst.selectat.direction_left);
+      Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
       return;
     }
@@ -204,7 +227,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t2) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M2;
-      //Serial.println("apasat: 2");
+      Serial.println("apasat: 2");
+      Serial.println(tst.selectat.direction_up);
+      Serial.println(tst.selectat.direction_down);
+      Serial.println(tst.selectat.direction_left);
+      Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
       return;
     }
@@ -212,7 +239,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t3) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M3;
-      //Serial.println("apasat: 3");
+      Serial.println("apasat: 3");
+      Serial.println(tst.selectat.direction_up);
+      Serial.println(tst.selectat.direction_down);
+      Serial.println(tst.selectat.direction_left);
+      Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led3, HIGH);
       return;
     }
@@ -220,7 +251,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t4) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M4;
-      //Serial.println("apasat: 4");
+      Serial.println("apasat: 4");
+      Serial.println(tst.selectat.direction_up);
+      Serial.println(tst.selectat.direction_down);
+      Serial.println(tst.selectat.direction_left);
+      Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led4, HIGH);
       return;
     }
