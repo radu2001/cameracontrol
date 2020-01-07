@@ -136,6 +136,9 @@ void loop() {
 void muta_motor(int X1, int Y1, MOTOR M) {
   if (X1 > 535) {  //stanga - axa X  //citim intre 487 < X < 535 sa eliminam eroarea joystick-ului in punctul 511 (1023/2)
     motor(M.speed_pin, M.direction_left, M.direction_right, 1, X1, true);
+    //analogWrite(pwm_port, map(spd, 536, 1023, 0, 255));
+    //digitalWrite(direction_port1, HIGH);
+     // digitalWrite(direction_port2, LOW);
   }
 
   else if (X1 < 487) { //dreapta
@@ -214,12 +217,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t1) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M1;
-      Serial.println("apasat: 1");
-      Serial.println(tst.selectat);
-      Serial.println(tst.selectat.direction_up);
-      Serial.println(tst.selectat.direction_down);
-      Serial.println(tst.selectat.direction_left);
-      Serial.println(tst.selectat.direction_right);
+      //Serial.println("apasat: 1");
+      //Serial.println(tst.selectat.direction_up);
+      //Serial.println(tst.selectat.direction_down);
+      //Serial.println(tst.selectat.direction_left);
+      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
       return;
     }
@@ -227,11 +229,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t2) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M2;
-      Serial.println("apasat: 2");
-      Serial.println(tst.selectat.direction_up);
-      Serial.println(tst.selectat.direction_down);
-      Serial.println(tst.selectat.direction_left);
-      Serial.println(tst.selectat.direction_right);
+      //Serial.println("apasat: 2");
+      //Serial.println(tst.selectat.direction_up);
+      //Serial.println(tst.selectat.direction_down);
+      //Serial.println(tst.selectat.direction_left);
+      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
       return;
     }
@@ -239,11 +241,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t3) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M3;
-      Serial.println("apasat: 3");
-      Serial.println(tst.selectat.direction_up);
-      Serial.println(tst.selectat.direction_down);
-      Serial.println(tst.selectat.direction_left);
-      Serial.println(tst.selectat.direction_right);
+      //Serial.println("apasat: 3");
+      //Serial.println(tst.selectat.direction_up);
+      //Serial.println(tst.selectat.direction_down);
+      //Serial.println(tst.selectat.direction_left);
+      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led3, HIGH);
       return;
     }
@@ -251,11 +253,11 @@ void read_key(TASTATURA &tst) {
     if (digitalRead(tst.t4) == LOW){
       _stop_motor_complet(tst);
       tst.selectat = M4;
-      Serial.println("apasat: 4");
-      Serial.println(tst.selectat.direction_up);
-      Serial.println(tst.selectat.direction_down);
-      Serial.println(tst.selectat.direction_left);
-      Serial.println(tst.selectat.direction_right);
+      //Serial.println("apasat: 4");
+      //Serial.println(tst.selectat.direction_up);
+      //Serial.println(tst.selectat.direction_down);
+      //Serial.println(tst.selectat.direction_left);
+      //Serial.println(tst.selectat.direction_right);
       //digitalWrite(tst.led4, HIGH);
       return;
     }
@@ -268,6 +270,7 @@ void do_zoom(int val_joystick, TASTATURA &tst) {
     digitalWrite(tst.zoom_selectat.zoom_in_slow, LOW);
     digitalWrite(tst.zoom_selectat.zoom_in_fast, LOW);
     digitalWrite(tst.zoom_selectat.zoom_out_fast, LOW);
+    return;
   }
   
   if (val_joystick > 635 && val_joystick < 1015) {
