@@ -1,6 +1,6 @@
-#define JOYSTICK_1_CONTROL_X 1 //joystick stanga
+#define JOYSTICK_1_CONTROL_X 1  // joystick stanga
 #define JOYSTICK_1_CONTROL_Y 0
-#define JOYSTICK_2_CONTROL_X 2 //joystick dreapta
+#define JOYSTICK_2_CONTROL_X 2  // joystick dreapta
 #define JOYSTICK_2_CONTROL_Y 3
 #define JOYSTICK_ZOOM_1 4
 #define JOYSTICK_ZOOM_2 5
@@ -130,60 +130,94 @@ void loop() {
     startTime = millis();
     }*/
 
-  read_key(T1);
-  read_key(T2);
+  if (read_key(T1)) {
+    stop_motor_complet(T1);
+  }
+  if (read_key(T2)) {
+    stop_motor_complet(T2);
+  }
 
   // hack ca sa evitam sa facem zoom in acelasi timp de la 2 joystick-uri
   if (T1.selectat == T2.selectat) {
     T2.selectat.zoom_selectat = {};
+    T2.selectat = {};
   }  // TODO: switch asincron sa nu controlam acelasi motor + zoom in acelasi timp de la 2 joystick-uri diferite.
 
-  X = analogRead(JOYSTICK_1_CONTROL_X);
-  Y = analogRead(JOYSTICK_1_CONTROL_Y);
-  Z = analogRead(JOYSTICK_ZOOM_1);
-  // Serial.println(X);
-  // Serial.println(Y);
-  // Serial.println(Z);
-  muta_motor_joystick1(X, Y, T1.selectat, Z);
-  X = analogRead(JOYSTICK_2_CONTROL_X);
-  Y = analogRead(JOYSTICK_2_CONTROL_Y);
-  Z = analogRead(JOYSTICK_ZOOM_2);
-  muta_motor_joystick2(X, Y, T2.selectat, Z);
-  // Serial.println(X);
-  // Serial.println(Y);
-  // Serial.println(Z);
+  muta_motor_joystick1(
+    analogRead(JOYSTICK_1_CONTROL_X),
+    analogRead(JOYSTICK_1_CONTROL_Y),
+    analogRead(JOYSTICK_ZOOM_1),
+    T1.selectat
+  );
+
+  muta_motor_joystick2(
+    analogRead(JOYSTICK_2_CONTROL_X),
+    analogRead(JOYSTICK_2_CONTROL_Y),
+    analogRead(JOYSTICK_ZOOM_2),
+    T2.selectat
+  );
 }
 
-void muta_motor_joystick1(int X1, int Y1, MOTOR M, int Z) {
+int read_key(TASTATURA &T) {
+  if (digitalRead(tst.t1) == LOW) {
+    T.selectat = M1;
+    //Serial.println("apasat: 1");
+    //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
+    return 1;
+  }
+
+  if (digitalRead(T.t2) == LOW) {
+    T.selectat = M2;
+    //Serial.println("apasat: 2");
+    //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
+    return 1;
+  }
+
+  if (digitalRead(T.t3) == LOW) {
+    T.selectat = M3;
+    //Serial.println("apasat: 3");
+    //digitalWrite(tst.led3, HIGH);
+    return 1;
+  }
+
+  if (digitalRead(T.t4) == LOW) {
+    T.selectat = M4;
+    //Serial.println("apasat: 4");
+    //digitalWrite(tst.led4, HIGH);
+    return 1;
+  }
+
+  return 0;
+}
+
+void stop_motor_complet(TASTATURA &T) {
+  digitalWrite(T.selectat.direction_up, HIGH);
+  digitalWrite(T.selectat.direction_down, HIGH);
+  digitalWrite(T.selectat.direction_left, HIGH);
+  digitalWrite(T.selectat.direction_right, HIGH);
+}
+
+void muta_motor_joystick1(int X1, int Y1, int Z, MOTOR M) {
   do_zoom_joystick1(Z, M.zoom_selectat);
 
   if (X1 > 535) {  // dreapta - axa X  // citim intre 487 < X < 535 sa eliminam eroarea joystick-ului in punctul 511 (1023/2)
     motor(M.speed_pin, M.direction_up, M.direction_down, 2, X1, true);
-  }
-
-  else if (X1 < 487) { //stanga
+  } else if (X1 < 487) { // stanga
     motor(M.speed_pin, M.direction_up, M.direction_down, 1, X1, false);
-  }
-
-  else { //cand revine joystick-ul la 0 pe axa stanga/dreapta
+  } else {  // cand revine joystick-ul la 0 pe axa stanga/dreapta
     motor(M.speed_pin, M.direction_up, M.direction_down, 3, X1, false);
   }
 
-  if (Y1 < 487) {  //sus - axa Y
+  if (Y1 < 487) {  // sus - axa Y
     motor(M.speed_pin, M.direction_right, M.direction_left, 2, Y1, false);
-  }
-
-  else if (Y1 > 535) { //jos
+  } else if (Y1 > 535) {  // jos
     motor(M.speed_pin, M.direction_right, M.direction_left, 1, Y1, true);
-  }
-
-  else { //cand revine joystick-ul la 0 pe axa sus/jos
+  } else {  // cand revine joystick-ul la 0 pe axa sus/jos
     motor(M.speed_pin, M.direction_right, M.direction_left, 3, Y1, false);
   }
-  return;
 }
 
-void muta_motor_joystick2(int X1, int Y1, MOTOR M, int Z) {
+void muta_motor_joystick2(int X1, int Y1, int Z, MOTOR M) {
 
   do_zoom_joystick2(Z, M.zoom_selectat);
 
@@ -236,7 +270,6 @@ void motor(
         Serial.println(map(spd, 486, 0, 0, 255));
       }
 
-      //
       digitalWrite(direction_port1, HIGH);
       digitalWrite(direction_port2, LOW);
       break;
@@ -266,47 +299,6 @@ void motor(
       digitalWrite(direction_port1, HIGH);
       digitalWrite(direction_port2, HIGH);
       break;
-  }
-}
-
-void _stop_motor_complet(TASTATURA &tst) {
-  digitalWrite(tst.selectat.direction_up, HIGH);
-  digitalWrite(tst.selectat.direction_down, HIGH);
-  digitalWrite(tst.selectat.direction_left, HIGH);
-  digitalWrite(tst.selectat.direction_right, HIGH);
-}
-
-void read_key(TASTATURA &tst) {
-  if (digitalRead(tst.t1) == LOW) {
-    _stop_motor_complet(tst);
-    tst.selectat = M1;
-    //Serial.println("apasat: 1");
-    //digitalWrite(tst.led1, HIGH);   //-->>> de schimbat cu shiftare pe biti, mult mai rapid
-    return;
-  }
-
-  if (digitalRead(tst.t2) == LOW) {
-    _stop_motor_complet(tst);
-    tst.selectat = M2;
-    //Serial.println("apasat: 2");
-    //digitalWrite(tst.led2, HIGH);  //---->>>> ce aprindem trebuie sa si inchidem...
-    return;
-  }
-
-  if (digitalRead(tst.t3) == LOW) {
-    _stop_motor_complet(tst);
-    tst.selectat = M3;
-    //Serial.println("apasat: 3");
-    //digitalWrite(tst.led3, HIGH);
-    return;
-  }
-
-  if (digitalRead(tst.t4) == LOW) {
-    _stop_motor_complet(tst);
-    tst.selectat = M4;
-    //Serial.println("apasat: 4");
-    //digitalWrite(tst.led4, HIGH);
-    return;
   }
 }
 
